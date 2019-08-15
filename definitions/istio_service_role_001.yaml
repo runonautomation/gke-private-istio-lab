@@ -1,0 +1,160 @@
+## Enable MTLS
+apiVersion: "authentication.istio.io/v1alpha1"
+kind: "Policy"
+metadata:
+  name: "default"
+  namespace: sr
+spec:
+  peers:
+  - mtls: {}
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: nginxsr
+  namespace: sr
+spec:
+  host: nginxsr
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+---
+apiVersion: "rbac.istio.io/v1alpha1"
+kind: RbacConfig
+metadata:
+  name: default
+  namespace: istio-system
+spec:
+  mode: 'ON_WITH_INCLUSION'
+  inclusion:
+    namespaces: ["sr"]
+#---
+#apiVersion: "rbac.istio.io/v1alpha1"
+#kind: ClusterRbacConfig
+#metadata:
+#  name: default
+#spec:
+#  mode: 'ON_WITH_INCLUSION'
+#  inclusion:
+#    namespaces: ["sr"]
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    istio-injection: enabled
+  name: sr
+---
+apiVersion: "rbac.istio.io/v1alpha1"
+kind: ServiceRole
+metadata:
+  name: service-viewer
+  namespace: sr
+spec:
+  rules:
+  - services: ["nginx*"]
+    methods: ["GET"]
+---
+apiVersion: "rbac.istio.io/v1alpha1"
+kind: ServiceRoleBinding
+metadata:
+  name: bind-service-viewer
+  namespace: sr
+spec:
+  subjects:
+  - properties:
+      source.principal: "cluster.local/ns/sr/sa/centossr"
+  roleRef:
+    kind: ServiceRole
+    name: "service-viewer"
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: centossr
+  namespace: sr
+---
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  namespace: sr
+  name: centossr
+spec:
+  selector:
+    matchLabels:
+      app: centossr
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: centossr
+      annotations:
+        sidecar.istio.io/inject: "true"
+    spec:
+      serviceAccountName: centossr
+      containers:
+      - name: centossr
+        image: centos:centos7
+        command: ["bash", "-c", "sleep 999999"]
+        ports:
+        - containerPort: 80
+          name: http
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: nginxsr
+  namespace: sr
+spec:  
+  gateways: 
+    - mesh
+  hosts:
+  - nginxsr
+  http:
+  - route:
+    - destination:
+        host: nginxsr
+---
+kind: Service
+apiVersion: v1
+metadata:
+  namespace: sr
+  name: nginxsr
+spec:
+  selector:
+    app: nginxsr
+  ports:
+  - protocol: TCP
+    port: 80
+    name: http
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: nginxsr
+  namespace: sr
+---
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  namespace: sr
+  name: nginxsr
+spec:
+  selector:
+    matchLabels:
+      app: nginxsr
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: nginxsr
+      annotations:
+        sidecar.istio.io/inject: "true"
+    spec:  
+      serviceAccountName: nginxsr
+      containers:
+      - name: nginxsr
+        image: nginx:1.7.9
+        ports:
+        - containerPort: 80
+          name: http

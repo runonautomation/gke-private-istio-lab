@@ -1,0 +1,85 @@
+# Enable MTLS authentication if disabled by defautl
+apiVersion: "authentication.istio.io/v1alpha1"
+kind: "Policy"
+metadata:
+  name: "jwt-example"
+  namespace: default
+spec:
+  targets:
+  - name: httpdjwt
+  origins:
+  - jwt:
+      issuer: "testing@secure.istio.io"
+      jwksUri: "https://raw.githubusercontent.com/istio/istio/release-1.1/security/tools/jwt/samples/jwks.json"
+  principalBinding: USE_ORIGIN
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  namespace: default
+  name: ingressgateway
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: httpdjwt
+spec:
+  gateways:
+    - ingressgateway  
+    - mesh
+  hosts:
+  - httpdjwt.com
+  http:
+  - route:
+    - destination:
+        host: httpdjwt
+      weight: 100
+---
+kind: Service
+apiVersion: v1
+metadata:
+  namespace: default
+  name: httpdjwt
+spec:
+  selector:
+    app: httpdjwt
+  ports:
+  - protocol: TCP
+    port: 80
+    name: http
+  type: LoadBalancer
+  
+---
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  namespace: default
+  name: httpdjwt
+spec:
+  selector:
+    matchLabels:
+      app: httpdjwt
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: httpdjwt
+      annotations:
+        sidecar.istio.io/inject: "true"
+    spec:
+      containers:
+      - name: httpdjwt
+        image: httpd:latest
+        ports:
+        - containerPort: 80
+          name: http

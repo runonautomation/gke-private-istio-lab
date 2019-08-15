@@ -1,0 +1,118 @@
+# kubectl -n netpolicy exec -it $(kubectl get pod -n netpolicy -l app=centos -o jsonpath="{.items[0].metadata.name}") bash
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: netpolicy
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: netpolicy-deny
+  namespace: netpolicy
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+---
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: centos
+  namespace: netpolicy
+spec:
+  podSelector:
+    matchLabels:
+      app: httpd
+  ingress:
+    - from:
+      - podSelector:
+          matchLabels:
+            app: centos2
+---
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  namespace: netpolicy
+  name: centos
+spec:
+  selector:
+    matchLabels:
+      app: centos
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: centos
+      annotations:
+        sidecar.istio.io/inject: "true"
+    spec:
+      containers:
+      - name: centos
+        image: centos:centos7
+        command: ["bash", "-c", "sleep 999999"]
+        ports:
+        - containerPort: 80
+          name: http
+---
+kind: Service
+apiVersion: v1
+metadata:
+  namespace: netpolicy
+  name: httpd
+spec:
+  selector:
+    app: httpd
+  ports:
+  - protocol: TCP
+    port: 80
+    name: http
+---
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  namespace: netpolicy
+  name: httpd
+spec:
+  selector:
+    matchLabels:
+      app: httpd
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: httpd
+      annotations:
+        sidecar.istio.io/inject: "true"
+    spec:
+      containers:
+      - name: httpd
+        image: httpd:latest
+        ports:
+        - containerPort: 80
+          name: http
+---
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  namespace: netpolicy
+  name: centos
+spec:
+  selector:
+    matchLabels:
+      app: centos
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: centos
+      annotations:
+        sidecar.istio.io/inject: "true"
+    spec:
+      containers:
+      - name: centos
+        image: centos:centos7
+        command: ["bash", "-c", "sleep 999999"]
+        ports:
+        - containerPort: 80
+          name: http

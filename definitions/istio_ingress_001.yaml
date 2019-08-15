@@ -1,0 +1,100 @@
+# How to generate the certs for this file
+# openssl req -new -newkey rsa:2048 -days 365 -nodes -x509 -subj "/C=UA/ST=Kyiv/O=SoftServe/CN=softserveinc.com" -keyout key.pem -out cert.pem
+# cat cert.pem | base64
+# cat key.pem  | base64
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  namespace: default
+  name: ingressgateway
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+---
+apiVersion: v1
+data:
+  tls.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURVakNDQWpxZ0F3SUJBZ0lKQUtJRXByMklMbW91TUEwR0NTcUdTSWIzRFFFQkN3VUFNRDR4RFRBTEJnTlYKQkFnTUJFdDVhWFl4RWpBUUJnTlZCQW9NQ1ZOdlpuUlRaWEoyWlRFWk1CY0dBMVVFQXd3UWMyOW1kSE5sY25abAphVzVqTG1OdmJUQWVGdzB4T1RBMk1Ea3hNVEUxTlRsYUZ3MHlNREEyTURneE1URTFOVGxhTUQ0eERUQUxCZ05WCkJBZ01CRXQ1YVhZeEVqQVFCZ05WQkFvTUNWTnZablJUWlhKMlpURVpNQmNHQTFVRUF3d1FjMjltZEhObGNuWmwKYVc1akxtTnZiVENDQVNJd0RRWUpLb1pJaHZjTkFRRUJCUUFEZ2dFUEFEQ0NBUW9DZ2dFQkFLK0tCK3JVZWVYYQpubkxoRXkzNkhRSEVBWFBSQXM0ZTBhTUluaUNISWxVU01YMGFwQU0rMXBURXVjT1pIcGxPRzUvQi9pbkhoclRHCkduekhoenpUU2lVbzRNbTlGOWpGUUFqVG44OGdOdmdGMkhvaXZyNHBTWTZDNkNSRTdqRGxwTzdZditmUWxQbDQKdXhRSzlnUVVCRXdZNDJqd0poNXhyc3ZCeWgwT2VIdzR3UVZtb3ljalprMG1zdmN4QVlXWmRsSURMYmlxQURVcgpKU2N4M3dpMk9MZzJrTXZDODhaVmZMQ1dvQmtpaEg5SjkwYW5IbFNudmFBUFoxZ0hqN2ZTWkZJTk1QZzhtQjhlCnY5Ny9MWlZ3dnFycjl2NmR6VWd1Mmg5Y0NaYWQvaG9hVDgzUHJoS1hDc1d5WUk3Z2QxZ1l6cHkwUE5uZ04xb1kKR1dNZjczVzJMMDBDQXdFQUFhTlRNRkV3SFFZRFZSME9CQllFRk05SXpDNGdzZ29EYi9TWlpobTgwMGRCZG82agpNQjhHQTFVZEl3UVlNQmFBRk05SXpDNGdzZ29EYi9TWlpobTgwMGRCZG82ak1BOEdBMVVkRXdFQi93UUZNQU1CCkFmOHdEUVlKS29aSWh2Y05BUUVMQlFBRGdnRUJBQnRxM25OaE8xbW1ZVnFlU2FkQzlpMUtCTExBOEJxeVcxM3QKeU5ZcWNvVDBySjhJaVdwY29ObUtYWXYyL1Fpc1AyaXRBeVhLQ1NuZ0psSHJCcXpKK1VmUEdUN20ya0FZblgrRAp3dUdsVFU2UjN4eTJDanVCbjNJYmFHWVo4dVRlWHNTNjNlbmc3MElIandPd2FEaGVYOU9nUC9Wa3d6YjdFZUhSCks1S1hIbHFjN3JyOENGU2EzRytIZnZoemVKY3RYZ1hWL3BVYmp4UFlkdjZrbkNQZHd4U1NvMU56SmdTK0VxcTgKZ1F4QmN1Tmp2OTlDYXp4cGVyZkZaclQweXpOMjdWREptNnNoeFhSWm1xWit2RTJZNWcrMFV2a2plbk9GeHpFNApVdW9zS01tcTRMTzBOZUx1ZEtBb3dqWTRSbS9JWm5kMmxrTW5hK055M1BINDZuTXhtMXc9Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+  tls.key: LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSUV2d0lCQURBTkJna3Foa2lHOXcwQkFRRUZBQVNDQktrd2dnU2xBZ0VBQW9JQkFRQ3ZpZ2ZxMUhubDJwNXkKNFJNdCtoMEJ4QUZ6MFFMT0h0R2pDSjRnaHlKVkVqRjlHcVFEUHRhVXhMbkRtUjZaVGh1ZndmNHB4NGEweGhwOAp4NGM4MDBvbEtPREp2UmZZeFVBSTA1L1BJRGI0QmRoNklyNitLVW1PZ3Vna1JPNHc1YVR1MkwvbjBKVDVlTHNVCkN2WUVGQVJNR09ObzhDWWVjYTdMd2NvZERuaDhPTUVGWnFNbkkyWk5KckwzTVFHRm1YWlNBeTI0cWdBMUt5VW4KTWQ4SXRqaTROcERMd3ZQR1ZYeXdscUFaSW9SL1NmZEdweDVVcDcyZ0QyZFlCNCszMG1SU0RURDRQSmdmSHIvZQoveTJWY0w2cTYvYituYzFJTHRvZlhBbVduZjRhR2svTno2NFNsd3JGc21DTzRIZFlHTTZjdER6WjREZGFHQmxqCkgrOTF0aTlOQWdNQkFBRUNnZ0VBR20vQlRYNStkVDE5aTNPV1BlQmpLZmJvK1JaTFE5dWtXdGRiYVM2dzN2c0UKZFFEa0hwRUNKQm1VbUg2Zyt4bW1VMk1WOGhqWWtyVWJIQnU0cEZKMTRpN0wyOVljbDBydG4rYXZOTFIzVXRjZQppUlplZjZrY0tOaFNPZFFmdzBGeW0zNE5PTTVUQVZkTFpYTlpKYmdXQlpmaDk5WGpCOGE3T25pUEJkMCtEQWNJCkdNaXNJaTZVRmtWV0VYU0R0M28vYzEzSHVEODBQMlIreWIzeVhhcWR3R0YvcGQ1N1JXSDhWZWxtSUoyeTAyWHYKdXN3Nks1WmR1MXRhdmFvNFVqZ0lja1dxamNPZXFYV0gwanlPSW8ybmZ2aFZNZWU2dDE1ZmxjbmdHaGFTWmkzVgo0ZjYzL09QTW9TQzFVcXhpM25aWUgzcXVGZEF6NGlEdVdSZkNNQmh6Q1FLQmdRRGpWWVRpM09wYlA0N3VqNXZ3CjFsN1BaOW12djNpS0dhUVJiSWpuTjRHalBWLzZiZ0JpZjBLOGdKbmlxN2xOMXB3Y0xxclFLNWtPdGRBSmM4enAKeTlTM2srOElUUnprYVM5N2tlVUNNR0ZrUzNPbFlNTUVtNm4xWGFtMFdrdzV2MTVnV0QwTFBTc1BYZUNzN3Y1VgpUN0hHTlpLd0l6K2hTNStFTWxSb01BdjdEd0tCZ1FERnJJcTc2UXN0NUFFcXlMcFZHMk5aYktWa1MzNXVHbmlNCkxONUt4andFWElMY2hFeWdvczV3Z3RablhnK0pocFB3OXpPNzRTVkVLaTR4bmNJL2dxMUFrNkU1VmJ2dndOTEIKS3pmdmpndlRCRG80amh6YkQ1SW1EKy9wSVdFT3E4RjcvY2QvR2paMXpoU281eEFBY3JhbEVXbnMrcnNhRVhWbgo5SjQxZUZSZjR3S0JnUURma3VxR3hxY0JLSWZrWEg0THBIaEgyQ1dCcjNmWHNaSG14T3Y3SVY2d2NScmtTcXk4Ck1kWXJWdnFBcjB3bG5pdVhsOW5Mc3lUckQ2blNzZjFUN1c5OVA5TDBRZ3BwSkgxYk5NZVptSVVmd3dpd0czS1EKSkp0SXdWMjJEcHdxcXVjaEw0YVJlQTNTSmd4aFp3WGdWdWxLT3NQUjBFaXkwNUhFekU2d3pKZnJ4d0tCZ1FDcgp6cEJ5VEZYVUdBVFBxOUVQNFpNVENUUWpITjZSVWQ2T2J2engzcVFSWWxxMjBTSk14OVJIdytBWHpaQVJodStVCmt6YmF5QS84MC9COFhWS1VvcjUwanh1azJwaFRCTFBwQXVoR0JKN1FWQzlLTW5Kd0QzT0dNM25nbFl0bkZlOUEKRmszTGNmdjluaFVrekZlREhERVUvVEtrcnpQcHIxenM4cGFEZ01kTTR3S0JnUUNZQXZwckovVkF3UHlSYWlIMgpBREw1a3loNmhxTkhRWFFwdlp5OEZiWEZiUHFCOS85c3YvNGpsZmpTMDFLL1YzWHJrMm1hUHcyc0hDVjVFYXorCkJ2K3F2QmhuMzdBVy9LOVkwVGFqeUsrSG5pdlJaOHExMDlYb0pWSXNUWTFuNlpZRVJ4WjRmRXFZTEllODJDcWEKblNUV1c4VlpZNG9qUCsvQ3RYU0Z2cEZJWmc9PQotLS0tLUVORCBQUklWQVRFIEtFWS0tLS0tCg==
+kind: Secret
+metadata:
+  name: istio-ingressgateway-tls-certs
+  namespace: istio-system
+type: Opaque
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: istio-ingressgateway-tls
+  namespace: istio-system
+spec:
+  tls:
+  - secretName: istio-ingressgateway-tls-certs
+  backend:
+    serviceName: istio-ingressgateway
+    servicePort: 80
+
+# This is a definition that allows the Ingress HTTPS LB to see the 
+# istio ingress gateway on default port
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  namespace: default
+  name: nginx-healthcheck-only
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - ingressgateway
+  http:
+  - match:
+    - uri:
+        exact: /
+    route:
+    - destination:
+        host: nginx-healthcheck-only
+        port:
+          number: 80
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  namespace: default
+  name: nginx-healthcheck-only
+spec:
+  selector:
+    app: nginx-healthcheck-only
+  ports:
+  - protocol: TCP
+    port: 80
+    
+---
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  namespace: default
+  name: nginx-healthcheck-only
+spec:
+  selector:
+    matchLabels:
+      app: nginx-healthcheck-only
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: nginx-healthcheck-only
+    spec:
+      containers:
+      - name: nginx-healthcheck-only
+        image: nginx:1.7.9
+        ports:
+        - containerPort: 80

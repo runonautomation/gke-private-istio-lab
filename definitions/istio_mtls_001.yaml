@@ -1,0 +1,50 @@
+apiVersion: "authentication.istio.io/v1alpha1"
+kind: "Policy"
+metadata:
+  name: "httpdmtls"
+  namespace: default
+spec:
+  targets:
+  - name: httpdmtls-lb
+  peers:
+  - mtls:
+      mode: STRICT
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  namespace: default
+  name: httpdmtls-lb
+spec:
+  selector:
+    app: httpdmtls
+  type: LoadBalancer
+  ports:
+  - protocol: TCP
+    port: 80
+    name: http
+---
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  namespace: default
+  name: httpdmtls
+spec:
+  selector:
+    matchLabels:
+      app: httpdmtls
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: httpdmtls
+      annotations:
+        sidecar.istio.io/inject: "true"
+    spec:
+      containers:
+      - name: httpdmtls
+        image: httpd:latest
+        ports:
+        - containerPort: 80
+          name: http
